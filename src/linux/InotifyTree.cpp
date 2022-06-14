@@ -3,6 +3,10 @@
 #include <sys/stat.h>
 
 #include <algorithm>
+#include <iostream>
+#include <fstream>
+
+std::ofstream logFile3("InotifyTreeLog.log");
 
 /**
  * InotifyTree ---------------------------------------------------------------------------------------------------------
@@ -10,6 +14,7 @@
 InotifyTree::InotifyTree(int inotifyInstance, std::string path, const std::vector<std::string> &excludedPaths):
   mError(""),
   mInotifyInstance(inotifyInstance) {
+  logFile3 << "InotifyTree::InotifyTree()" << std::endl;
   mInotifyNodeByWatchDescriptor = new std::map<int, InotifyNode *>;
   std::string directory;
   std::string watchName;
@@ -24,6 +29,7 @@ InotifyTree::InotifyTree(int inotifyInstance, std::string path, const std::vecto
   }
 
   mWatchedPath = directory + "/" + watchName;
+  logFile3 << "InotifyTree::InotifyTree()" << mWatchedPath << std::endl;
 
   struct stat file;
   if (stat(mWatchedPath.c_str(), &file) < 0) {
@@ -31,6 +37,7 @@ InotifyTree::InotifyTree(int inotifyInstance, std::string path, const std::vecto
     return;
   }
 
+  logFile3 << "InotifyTree:: before InotifyNode()"<< std::endl;
   mRoot = new InotifyNode(
     this,
     mInotifyInstance,
@@ -39,7 +46,9 @@ InotifyTree::InotifyTree(int inotifyInstance, std::string path, const std::vecto
     watchName,
     file.st_ino
   );
+  logFile3 << "InotifyTree:: after0 InotifyNode()"<< std::endl;
   addInode(file.st_ino, mRoot);
+  logFile3 << "InotifyTree:: after InotifyNode()"<< std::endl;
 
   if (!mRoot->isAlive()) {
     delete mRoot;

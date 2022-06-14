@@ -1,22 +1,33 @@
 #include "../../includes/linux/InotifyService.h"
+#include <iostream>
+#include <fstream>
+
+std::ofstream logFile2("InotifyServiceLog.log");
 
 InotifyService::InotifyService(std::shared_ptr<EventQueue> queue, std::string path, const std::vector<std::string> &excludedPaths):
   mEventLoop(NULL),
   mQueue(queue),
   mTree(NULL) {
+  logFile2 << "InotifyService::InotifyService()" << std::endl;
   mInotifyInstance = inotify_init();
+  logFile2 << "InotifyService:: after init" << mInotifyInstance << std::endl;
 
   if (mInotifyInstance == -1) {
     return;
   }
 
+  logFile2 << "InotifyService:: before mTree" << mInotifyInstance << std::endl;
   mTree = new InotifyTree(mInotifyInstance, path, excludedPaths);
+  logFile2 << "InotifyService:: after mTree" << mInotifyInstance << std::endl;
+
   if (!mTree->isRootAlive()) {
+      logFile2 << "InotifyService:: isRootAlive" << std::endl;
     delete mTree;
     mTree = NULL;
     mEventLoop = NULL;
     close(mInotifyInstance);
   } else {
+          logFile2 << "InotifyService:: NOT isRootAlive" << std::endl;
     mEventLoop = new InotifyEventLoop(
       mInotifyInstance,
       this

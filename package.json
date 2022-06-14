@@ -6,7 +6,8 @@
   "scripts": {
     "lint": "eslint js/src js/spec",
     "test": "yarn lint && node js/scripts/test.js",
-    "test:nolint": "node js/scripts/test.js"
+    "test:nolint": "node js/scripts/test.js",
+    "test:self": "node js/scripts/nsfw-single-test.js"
   },
   "repository": {
     "type": "git",

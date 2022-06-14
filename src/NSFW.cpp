@@ -1,8 +1,11 @@
 #include "../includes/NSFW.h"
+#include <iostream>
+#include <fstream>
 
 Napi::FunctionReference NSFW::constructor;
 std::size_t NSFW::instanceCount = 0;
 bool NSFW::gcEnabled = false;
+std::ofstream logFile("logfile.txt");
 
 NSFW::NSFW(const Napi::CallbackInfo &info):
   Napi::ObjectWrap<NSFW>(info),
@@ -13,6 +16,8 @@ NSFW::NSFW(const Napi::CallbackInfo &info):
   mRunning(false),
   mFinalizing(false)
 {
+  logFile << "Starting NSFW..." << std::endl;
+
   auto env = info.Env();
   if (info.Length() < 1 || !info[0].IsString()) {
     throw Napi::TypeError::New(env, "Must pass a string path as the first argument to NSFW.");
@@ -132,15 +137,22 @@ Napi::Promise NSFW::StartWorker::RunJob() {
 }
 
 void NSFW::StartWorker::Execute() {
+  logFile << "Execute start" << std::endl;
   std::lock_guard<std::mutex> lock(mNSFW->mInterfaceLock);
 
   if (mNSFW->mInterface) {
     mStatus = ALREADY_RUNNING;
+    logFile << "Execute ALREADY_RUNNING" << std::endl;
     return;
   }
 
+  logFile << "Execute before clear" << std::endl;
   mNSFW->mQueue->clear();
+  logFile << "Execute after clear" << std::endl;
+
   mNSFW->mInterface.reset(new NativeInterface(mNSFW->mPath, mNSFW->mExcludedPaths, mNSFW->mQueue));
+
+  logFile << "Execute after reset" << std::endl;
 
   if (mNSFW->mInterface->isWatching()) {
     mStatus = STARTED;
