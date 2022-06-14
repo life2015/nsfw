@@ -340,6 +340,7 @@ InotifyTree::InotifyNode::InotifyNode(
     );
 
     if (!mTree->addInode(file.st_ino, child)) { // Skip this inode if already watching
+      logFile3 << "Skipping inode " << mFullPath << " because it is already being watched" << std::endl;
       delete child;
       continue;
     }
